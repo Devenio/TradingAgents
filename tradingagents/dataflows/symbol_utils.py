@@ -52,21 +52,23 @@ _CRYPTO_BASES = frozenset(
 # adding rows — no call site changes required.
 _ALIASES = {
     # Precious metals (spot names -> COMEX/NYMEX futures)
-    "XAUUSD": "GC=F", "XAU": "GC=F", "GOLD": "GC=F",
-    "XAGUSD": "SI=F", "XAG": "SI=F", "SILVER": "SI=F",
-    "XPTUSD": "PL=F", "XPDUSD": "PA=F",
+    "XAUUSD": "GC=F", "XAU": "GC=F", "GOLD": "GC=F", "GOLDUSD": "GC=F", "SPOTGOLD": "GC=F",
+    "XAGUSD": "SI=F", "XAG": "SI=F", "SILVER": "SI=F", "SILVERUSD": "SI=F", "SPOTSILVER": "SI=F",
+    "XPTUSD": "PL=F", "XPT": "PL=F", "PLATINUM": "PL=F",
+    "XPDUSD": "PA=F", "XPD": "PA=F", "PALLADIUM": "PA=F",
     # Energy
-    "WTICOUSD": "CL=F", "USOIL": "CL=F", "WTI": "CL=F",
-    "BCOUSD": "BZ=F", "UKOIL": "BZ=F", "BRENT": "BZ=F",
-    "NATGAS": "NG=F", "XNGUSD": "NG=F",
+    "WTICOUSD": "CL=F", "USOIL": "CL=F", "WTI": "CL=F", "WTIUSD": "CL=F",
+    "CRUDE": "CL=F", "CRUDEOIL": "CL=F", "OIL": "CL=F",
+    "BCOUSD": "BZ=F", "UKOIL": "BZ=F", "BRENT": "BZ=F", "BRENTUSD": "BZ=F",
+    "NATGAS": "NG=F", "XNGUSD": "NG=F", "NGAS": "NG=F",
     "COPPER": "HG=F", "XCUUSD": "HG=F",
     # Index CFDs -> Yahoo index symbols
     "SPX500": "^GSPC", "US500": "^GSPC", "SPX": "^GSPC",
-    "NAS100": "^NDX", "US100": "^NDX", "USTEC": "^NDX",
-    "US30": "^DJI", "DJI30": "^DJI", "WS30": "^DJI",
-    "GER40": "^GDAXI", "GER30": "^GDAXI", "DE40": "^GDAXI",
-    "UK100": "^FTSE", "JP225": "^N225", "JPN225": "^N225",
-    "FRA40": "^FCHI", "EU50": "^STOXX50E", "HK50": "^HSI",
+    "NAS100": "^NDX", "US100": "^NDX", "USTEC": "^NDX", "NDX": "^NDX",
+    "US30": "^DJI", "DJI30": "^DJI", "WS30": "^DJI", "DJIA": "^DJI",
+    "GER40": "^GDAXI", "GER30": "^GDAXI", "DE40": "^GDAXI", "DAX": "^GDAXI",
+    "UK100": "^FTSE", "JP225": "^N225", "JPN225": "^N225", "NIKKEI": "^N225",
+    "FRA40": "^FCHI", "CAC40": "^FCHI", "EU50": "^STOXX50E", "HK50": "^HSI", "HSI": "^HSI",
 }
 
 # Yahoo symbols may contain letters, digits, and these structural characters.
@@ -113,8 +115,9 @@ def normalize_symbol(raw: str) -> str:
          equities, ETFs, Yahoo-native symbols like ``GC=F`` or ``^GSPC``).
 
     A trailing ``+`` (broker CFD marker, e.g. ``XAUUSD+``) is stripped before
-    matching. The function is purely syntactic — it performs no network
-    calls — so it is safe to apply on every request.
+    matching, as are spaces and slashes (``XAU/USD``, ``EUR/USD``). The function
+    is purely syntactic — it performs no network calls — so it is safe to apply
+    on every request.
     """
     if not isinstance(raw, str) or not raw.strip():
         return raw
@@ -122,6 +125,7 @@ def normalize_symbol(raw: str) -> str:
     s = raw.strip().upper()
     # Broker CFD/qualifier suffixes Yahoo never uses.
     s = s.rstrip("+")
+    s = s.replace("/", "").replace(" ", "")
 
     crypto = _normalize_crypto(s)
     if s in _ALIASES:

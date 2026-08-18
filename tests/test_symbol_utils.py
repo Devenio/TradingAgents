@@ -27,6 +27,7 @@ class TestNormalizeSymbol(unittest.TestCase):
         self.assertEqual(normalize_symbol("XAUUSD+"), "GC=F")   # broker CFD suffix
         self.assertEqual(normalize_symbol("xauusd+"), "GC=F")
         self.assertEqual(normalize_symbol("GOLD"), "GC=F")
+        self.assertEqual(normalize_symbol("XAU/USD"), "GC=F")
         self.assertEqual(normalize_symbol("XAGUSD"), "SI=F")
 
     def test_energy_and_index_aliases(self):
@@ -37,6 +38,7 @@ class TestNormalizeSymbol(unittest.TestCase):
 
     def test_forex_pairs_get_x_suffix(self):
         self.assertEqual(normalize_symbol("EURUSD"), "EURUSD=X")
+        self.assertEqual(normalize_symbol("EUR/USD"), "EURUSD=X")
         self.assertEqual(normalize_symbol("GBPJPY"), "GBPJPY=X")
         self.assertEqual(normalize_symbol("eurusd"), "EURUSD=X")
 
